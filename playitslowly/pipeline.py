@@ -34,33 +34,37 @@ from playitslowly import myGtk
 
 _ = lambda x: x
 
+
 class Pipeline(Gst.Pipeline):
     def __init__(self, sink):
+        """
+        Initialize pipeline. Creates different objects play_bin, speed_changer, audio_sink and eos.
+        """
         Gst.Pipeline.__init__(self)
         self.playbin = Gst.ElementFactory.make("playbin")
         self.add(self.playbin)
 
-        bin = Gst.Bin()
+        gst_bin = Gst.Bin()
         self.speedchanger = Gst.ElementFactory.make("pitch")
         if self.speedchanger is None:
             myGtk.show_error(_("You need to install the Gstreamer soundtouch elements for "
-                    "play it slowly to. They are part of Gstreamer-plugins-bad. Consult the "
-                    "README if you need more information.")).run()
+                               "play it slowly too. They are part of Gstreamer-plugins-bad. Consult the "
+                               "README if you need more information.")).run()
             raise SystemExit()
 
-        bin.add(self.speedchanger)
+        gst_bin.add(self.speedchanger)
 
         self.audiosink = Gst.parse_launch(sink)
         #self.audiosink = Gst.ElementFactory.make(sink, "sink")
 
-        bin.add(self.audiosink)
+        gst_bin.add(self.audiosink)
         convert = Gst.ElementFactory.make("audioconvert")
-        bin.add(convert)
+        gst_bin.add(convert)
         self.speedchanger.link(convert)
         convert.link(self.audiosink)
         sink_pad = Gst.GhostPad.new("sink", self.speedchanger.get_static_pad("sink"))
-        bin.add_pad(sink_pad)
-        self.playbin.set_property("audio-sink", bin)
+        gst_bin.add_pad(sink_pad)
+        self.playbin.set_property("audio-sink", gst_bin)
         #bus = self.playbin.get_bus()
         #bus.add_signal_watch()
         #bus.connect("message", self.on_message)
@@ -68,6 +72,11 @@ class Pipeline(Gst.Pipeline):
         self.eos = lambda: None
 
     def on_message(self, bus, message):
+        """
+        React on messages Gst.MESSAGE_EOS (call self.eos()) and Gst.MESSAGE_ERROR (show error message).
+        :param bus: unused
+        :param message: the message to evaluate
+        """
         t = message.type
         if t == Gst.MESSAGE_EOS:
             self.eos()
@@ -101,21 +110,21 @@ class Pipeline(Gst.Pipeline):
         pipeline.add(playbin)
         playbin.set_property("uri", self.playbin.get_property("uri"))
 
-        bin = Gst.Bin()
+        gst_bin = Gst.Bin()
 
         speedchanger = Gst.ElementFactory.make("pitch")
         speedchanger.set_property("tempo", self.speedchanger.get_property("tempo"))
         speedchanger.set_property("pitch", self.speedchanger.get_property("pitch"))
-        bin.add(speedchanger)
+        gst_bin.add(speedchanger)
 
         audioconvert = Gst.ElementFactory.make("audioconvert")
-        bin.add(audioconvert)
+        gst_bin.add(audioconvert)
 
         encoder = Gst.ElementFactory.make("wavenc")
-        bin.add(encoder)
+        gst_bin.add(encoder)
 
         filesink = Gst.ElementFactory.make("filesink")
-        bin.add(filesink)
+        gst_bin.add(filesink)
         filesink.set_property("location", uri)
 
         speedchanger.link(audioconvert)
@@ -123,12 +132,12 @@ class Pipeline(Gst.Pipeline):
         encoder.link(filesink)
 
         sink_pad = Gst.GhostPad.new("sink", speedchanger.get_static_pad("sink"))
-        bin.add_pad(sink_pad)
-        playbin.set_property("audio-sink", bin)
+        gst_bin.add_pad(sink_pad)
+        playbin.set_property("audio-sink", gst_bin)
 
         pipeline.set_state(Gst.State.PLAYING)
 
-        return (pipeline, playbin)
+        return pipeline, playbin
 
     def set_file(self, uri):
         self.playbin.set_property("uri", uri)
@@ -141,5 +150,3 @@ class Pipeline(Gst.Pipeline):
 
     def reset(self):
         self.set_state(Gst.State.READY)
-
-

@@ -56,6 +56,10 @@ http://github.com/jwagner/playitslowly
 If you have any questions or a patch just drop me a mail
 or fill a pull request on github.
 
+On Archlinux you need the following packages installed:
+``python cairo pkgconf gobject-introspection gtk3``. Then you can
+install ``pygobject`` in venv and start hacking. Package ``pygobject-stubs``
+is installed as developer dependency.
 
 License
 =======

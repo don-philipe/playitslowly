@@ -47,7 +47,7 @@ from playitslowly import myGtk
 myGtk.install()
 
 
-_ = lambda s: s # may be add gettext later
+_ = lambda s: s     # may be add gettext later
 
 NAME = "Play it Slowly"
 VERSION = "1.5.1"
@@ -63,9 +63,11 @@ else:
 
 TIME_FORMAT = Gst.Format(Gst.Format.TIME)
 
+
 def in_pathlist(filename, paths = os.environ.get("PATH").split(os.pathsep)):
     """check if an application is somewhere in $PATH"""
     return any(os.path.exists(os.path.join(path, filename)) for path in paths)
+
 
 class Config(dict):
     """Very simple json config file"""
@@ -140,13 +142,17 @@ class MainWindow(Gtk.Window):
         self.startchooser = myGtk.TextScaleWithCurPos(self.positionchooser, Gtk.Adjustment.new(0.0, 0, 100.0, 0, 0, 0))
         self.startchooser.scale.connect("button-press-event", self.start_seeking)
         self.startchooser.scale.connect("button-release-event", self.seeked)
-        self.startchooser.add_accelerator("clicked", self.accel_group, ord('['), Gdk.ModifierType.CONTROL_MASK, Gtk.AccelFlags.VISIBLE)
+        self.startchooser.add_accelerator("clicked", self.accel_group, ord('['), Gdk.ModifierType.CONTROL_MASK,
+                                          Gtk.AccelFlags.VISIBLE)
         self.startchooser.add_accelerator("clicked", self.accel_group, ord('['), 0, Gtk.AccelFlags.VISIBLE)
 
-        self.endchooser = myGtk.TextScaleWithCurPos(self.positionchooser, Gtk.Adjustment.new(1.0, 0, 100.0, 0.01, 0.01, 0))
+                                                                            # startvalue, minvalue, maxvalue, ?, ?, ?
+        self.endchooser = myGtk.TextScaleWithCurPos(self.positionchooser, Gtk.Adjustment.new(1.0, 0, 100.0, 0.01, 0.01,
+                                                                                             0))
         self.endchooser.scale.connect("button-press-event", self.start_seeking)
         self.endchooser.scale.connect("button-release-event", self.seeked)
-        self.endchooser.add_accelerator("clicked", self.accel_group, ord(']'), Gdk.ModifierType.CONTROL_MASK, Gtk.AccelFlags.VISIBLE)
+        self.endchooser.add_accelerator("clicked", self.accel_group, ord(']'), Gdk.ModifierType.CONTROL_MASK,
+                                        Gtk.AccelFlags.VISIBLE)
         self.endchooser.add_accelerator("clicked", self.accel_group, ord(']'), 0, Gtk.AccelFlags.VISIBLE)
 
         self.vbox.pack_start(filechooserhbox, False, False, 0)
@@ -227,11 +233,10 @@ class MainWindow(Gtk.Window):
             manager.add_full(uri, recent_data)
             print(app_exec, mime_type)
 
-
     def show_recent(self, sender=None):
         dialog = Gtk.RecentChooserDialog(_("Recent Files"), self, None,
-                (Gtk.STOCK_CANCEL, Gtk.ResponseType.CANCEL,
-                 Gtk.STOCK_OPEN, Gtk.ResponseType.OK))
+                                         (Gtk.STOCK_CANCEL, Gtk.ResponseType.CANCEL,
+                                          Gtk.STOCK_OPEN, Gtk.ResponseType.OK))
 
         filter = Gtk.RecentFilter()
         filter.set_name("playitslowly")
@@ -305,13 +310,10 @@ class MainWindow(Gtk.Window):
         self.config_saving = False
         lastfile = self.filedialog.get_uri()
         self.config["lastfile"] = lastfile
-        settings = {}
-        settings["speed"] = self.speedchooser.get_value()
-        settings["pitch"] = self.get_pitch()
-        settings["duration"] = self.startchooser.get_adjustment().get_property("upper")
-        settings["start"] = self.startchooser.get_value()
-        settings["end"] = self.endchooser.get_value()
-        settings["volume"] = self.volume_button.get_value()
+        settings = {"speed": self.speedchooser.get_value(), "pitch": self.get_pitch(),
+                    "duration": self.startchooser.get_adjustment().get_property("upper"),
+                    "start": self.startchooser.get_value(), "end": self.endchooser.get_value(),
+                    "volume": self.volume_button.get_value()}
         self.config.setdefault("files", {})[lastfile] = settings
 
         self.config.save()
@@ -331,7 +333,7 @@ class MainWindow(Gtk.Window):
 
     def save(self, sender):
         dialog = myGtk.FileChooserDialog(_("Save modified version as"),
-                self, Gtk.FileChooserAction.SAVE)
+                                         self, Gtk.FileChooserAction.SAVE)
         dialog.set_current_name("export.wav")
         if dialog.run() == Gtk.ResponseType.OK:
             self.pipeline.set_file(self.filedialog.get_uri())
@@ -482,12 +484,10 @@ GNU General Public License for more details.
         about.run()
         about.destroy()
 
+
 css = b"""
 .buttonBox GtkButton GtkLabel { padding-left: 4px; }
 """
-
-
-
 
 
 def main():
@@ -529,6 +529,7 @@ def main():
         win.set_uri(uri)
     win.show_all()
     Gtk.main()
+
 
 if __name__ == "__main__":
     main()

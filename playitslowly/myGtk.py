@@ -26,12 +26,14 @@ import collections
 
 _ = lambda s: s
 
-buttons_ok_cancel = (Gtk.STOCK_CANCEL,Gtk.ResponseType.CANCEL,Gtk.STOCK_OPEN,Gtk.ResponseType.OK)
+buttons_ok_cancel = (Gtk.STOCK_CANCEL, Gtk.ResponseType.CANCEL, Gtk.STOCK_OPEN, Gtk.ResponseType.OK)
+
+
 class FileChooserDialog(Gtk.FileChooserDialog):
     """a file chooser dialog which automatically sets the correct buttons!"""
     def __init__(self, title=None, parent=None, action=None):
         if action == Gtk.FileChooserAction.SAVE:
-            buttons = (Gtk.STOCK_CANCEL, Gtk.ResponseType.CANCEL, Gtk.STOCK_SAVE ,Gtk.ResponseType.OK)
+            buttons = (Gtk.STOCK_CANCEL, Gtk.ResponseType.CANCEL, Gtk.STOCK_SAVE, Gtk.ResponseType.OK)
             title = title or _("Save File")
         else:
             if action == Gtk.FileChooserAction.SELECT_FOLDER:
@@ -40,8 +42,9 @@ class FileChooserDialog(Gtk.FileChooserDialog):
                 title = title or _("Create Folder")
             else:
                 title = title or _("Open a File")
-            buttons = (Gtk.STOCK_CANCEL, Gtk.ResponseType.CANCEL, Gtk.STOCK_OPEN ,Gtk.ResponseType.OK)
+            buttons = (Gtk.STOCK_CANCEL, Gtk.ResponseType.CANCEL, Gtk.STOCK_OPEN, Gtk.ResponseType.OK)
         Gtk.FileChooserDialog.__init__(self, title, parent, action, buttons)
+
 
 class IconFactory:
     def __init__(self, icon_theme):
@@ -74,8 +77,10 @@ class IconFactory:
     def has_icon(self, name):
         return self.icon_theme.has_icon(name)
 
+
 icon_theme = Gtk.IconTheme.get_default()
 iconfactory = IconFactory(icon_theme)
+
 
 def idle_do(func, *args):
     """wrapper arround idle_add that will always run once"""
@@ -83,6 +88,7 @@ def idle_do(func, *args):
         # throw away the result of the function!
         func(*args)
     GObject.idle_add(wrapper, *args)
+
 
 def scrolled(widget, shadow=Gtk.ShadowType.NONE):
     window = Gtk.ScrolledWindow()
@@ -99,9 +105,10 @@ def make_table(widgets):
     for y, row in enumerate(widgets):
         for x, widget in enumerate(row):
             if widget:
-                table.attach(widget, x, x+1, y, y+1,
-                        xoptions=Gtk.AttachOptions.EXPAND|Gtk.AttachOptions.FILL, xpadding=4, ypadding=4)
+                table.attach(widget, x, x+1, y, y+1, xoptions=Gtk.AttachOptions.EXPAND | Gtk.AttachOptions.FILL,
+                             xpadding=4, ypadding=4)
     return table
+
 
 class Gtklock:
     """A context manger for the Gdk.threads_*
@@ -118,10 +125,12 @@ class Gtklock:
     def __exit__(*args):
         Gdk.threads_leave()
 
+
 def Gtk_yield():
     """process all the peding events in the mainloop"""
     while Gtk.events_pending():
-         Gtk.main_iteration()
+        Gtk.main_iteration()
+
 
 class IconButton(Gtk.Button):
     def __init__(self, icon, size=None, label=None):
@@ -150,8 +159,10 @@ class IconButton(Gtk.Button):
         self._icon = icon
     icon = property(lambda self: self._icon, set_icon)
 
+
 class IconMenuItem(Gtk.ImageMenuItem):
     icon_size = Gtk.icon_size_lookup(Gtk.IconSize.MENU)[0]
+
     def __init__(self, icon, text):
         GObject.GObject.__init__(self)
         self.set_image(iconfactory.get_image(icon, self.icon_size))
@@ -159,6 +170,7 @@ class IconMenuItem(Gtk.ImageMenuItem):
         label.set_alignment(0.0, 0.5)
         self.add(label)
         self.show_all()
+
 
 def show_error(msg):
     """Show a 'nice' errbox"""
@@ -171,6 +183,7 @@ def show_error(msg):
     dialog.show()
     dialog.connect("response", lambda dialog, response: dialog.destroy())
     return dialog
+
 
 def make_menu(entries, menu):
     for entry in entries:
@@ -194,24 +207,18 @@ def make_menu(entries, menu):
                 make_menu(sub, submenu)
         menu.append(item)
 
+
 def form(rows):
     table = Gtk.Table(len(rows), 2, False)
     for y, (text, widget) in enumerate(rows):
         label = Gtk.Label(label=text)
         label.set_alignment(0.0, 0.5)
-        table.attach(label, 0, 1, y, y+1, xoptions=Gtk.AttachOptions.SHRINK|Gtk.AttachOptions.FILL, xpadding=4, ypadding=4)
-        table.attach(widget, 1, 2, y, y+1, xoptions=Gtk.AttachOptions.EXPAND|Gtk.AttachOptions.FILL, xpadding=4, ypadding=4)
+        table.attach(label, 0, 1, y, y+1, xoptions=Gtk.AttachOptions.SHRINK | Gtk.AttachOptions.FILL, xpadding=4,
+                     ypadding=4)
+        table.attach(widget, 1, 2, y, y+1, xoptions=Gtk.AttachOptions.EXPAND | Gtk.AttachOptions.FILL, xpadding=4,
+                     ypadding=4)
     return table
 
-def make_table(widgets):
-    """return a Gtk.Table containing all the widgets"""
-    columns = max(list(map(len, widgets)))
-    table = Gtk.Table(len(widgets), columns, False)
-    for y, row in enumerate(widgets):
-        for x, widget in enumerate(row):
-            table.attach(widget, x, x+1, y, y+1, xoptions=Gtk.AttachOptions.EXPAND|Gtk.AttachOptions.FILL,
-                    xpadding=4, ypadding=4)
-    return table
 
 class Scale(object):
     """A scale that adheres to increment steps"""
@@ -227,16 +234,19 @@ class Scale(object):
         self.set_value(min(max(lower, value), upper))
         return True
 
+
 class VScale(Gtk.VScale, Scale):
     def __init__(self, *args):
         Gtk.VScale.__init__(self, *args)
         Scale.__init__(self)
+
 
 class HScale(Gtk.HScale, Scale):
     def __init__(self, *args):
         Gtk.HScale.__init__(self)
         Scale.__init__(self)
         self.set_adjustment(*args)
+
 
 class ClockScale(Gtk.VBox):
     def __init__(self, *args):
@@ -256,8 +266,10 @@ class ClockScale(Gtk.VBox):
 
         self.pack_start(self.clocklabel, True, True, 0)
         self.pack_start(self.scale, True, True, 0)
+
     def update_clock(self, sender=None):
         self.clocklabel.set_markup(self.format(self.get_value()))
+
     def format(self, value):
         ms = str(timedelta(seconds=value))[8:11]
         value = str(timedelta(seconds=value))[:7]
@@ -265,9 +277,11 @@ class ClockScale(Gtk.VBox):
             ms = '000'
         return '<span size="xx-large" weight="bold">%s<span size="medium">.%s</span></span>' % (value, ms)
 
+
 class TextScale(Gtk.HBox):
     format = "%.2f"
     size = 6
+
     def __init__(self, *args):
         GObject.GObject.__init__(self)
         self.from_text = False
@@ -308,6 +322,7 @@ class TextScale(Gtk.HBox):
             pass
         self.from_text = False
 
+
 class TextScaleReset(TextScale):
     def __init__(self, *args):
         TextScale.__init__(self, *args)
@@ -319,8 +334,10 @@ class TextScaleReset(TextScale):
         self.reorder_child(self.reset_button, 1)
         self.default_value = self.get_value()
         self.add_accelerator = self.reset_button.add_accelerator
+
     def reset_to_default(self, sender=None):
         self.set_value(self.default_value)
+
 
 # TODO: substitute for a decorator?
 class TextScaleWithCurPos(TextScale):
@@ -333,8 +350,10 @@ class TextScaleWithCurPos(TextScale):
         self.reorder_child(self.now_button, 1)
         self.slider = slider
         self.add_accelerator = self.now_button.add_accelerator
+
     def update_to_current_position(self, sender=None):
         self.set_value(self.slider.get_value())
+
 
 class ListStore(Gtk.ListStore):
     class Columns(list):
@@ -364,7 +383,6 @@ class ListStore(Gtk.ListStore):
         for row in data:
             self.append(self.columns.ordered(row))
 
-
     def append(self, *args, **kwargs):
         if args:
             Gtk.ListStore.append(self, *args)
@@ -376,7 +394,8 @@ class ExceptionDialog(Gtk.MessageDialog):
     def __init__(self, etype, evalue, etb):
         Gtk.MessageDialog.__init__(self, buttons=Gtk.ButtonsType.CLOSE, type=Gtk.MessageType.ERROR)
         self.set_resizable(True)
-        self.set_markup(_("An error has occured:\n%r\nYou should save your work and restart the application. If the error occurs again please report it to the developer." % evalue))
+        self.set_markup(_("An error has occured:\n%r\nYou should save your work and restart the application. If the "
+                          "error occurs again please report it to the developer." % evalue))
         import cgitb
         text = cgitb.text((etype, evalue, etb), 5)
         expander = Gtk.Expander()
@@ -387,8 +406,10 @@ class ExceptionDialog(Gtk.MessageDialog):
         expander.add(scrolled(textview))
         self.show_all()
 
+
 def install_exception_hook(dialog=ExceptionDialog):
     old_hook = sys.excepthook
+
     def new_hook(etype, evalue, etb):
         if etype not in (KeyboardInterrupt, SystemExit):
             print(etype)
@@ -399,12 +420,15 @@ def install_exception_hook(dialog=ExceptionDialog):
     new_hook.old_hook = old_hook
     sys.excepthook = new_hook
 
+
 def install():
     """install/register all hooks provided by myGtk"""
     install_exception_hook()
 
+
 def add_style_class(widget, name):
     widget.get_style_context().add_class(name)
+
 
 if __name__ == "__main__":
     install_exception_hook()

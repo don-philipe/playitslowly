@@ -3,11 +3,13 @@ import sys
 import os
 
 from distutils.core import setup
-from distutils.command.install import install, write_file
+from distutils.command.install import install
 from distutils.command.install_egg_info import to_filename, safe_name
+from distutils.file_util import write_file
 from functools import reduce
 
-class new_install(install):
+
+class NewInstall(install):
     def initialize_options(self):
         install.initialize_options(self)
 
@@ -34,26 +36,29 @@ class new_install(install):
                 (install_info, outputs),
                 "writing install-info to '%s'" % install_info)
 
-def ls_r(dir):
+
+def ls_r(directory):
     def do_reduce(a, b):
         files = []
         for f in b[2]:
             files.append(os.path.join(b[0], f))
         a.append((b[0], files))
         return a
-    return reduce(do_reduce, os.walk(dir), [])
+    return reduce(do_reduce, os.walk(directory), [])
+
 
 kwargs = {
-      'cmdclass': {'install': new_install},
+      'cmdclass': {'install': NewInstall},
       'name': 'playitslowly',
       'version': "1.5.1",
-      'description': 'A tool to help you when transcribing music. It allows you to play a piece of music at a different speed or pitch.',
+      'description': 'A tool to help you when transcribing music. It allows you to play a piece of music at a different'
+                     ' speed or pitch.',
       'author': 'Jonas Wagner',
       'author_email': 'jonas@29a.ch',
       'url': 'http://29a.ch/playitslowly/',
       'packages': ['playitslowly'],
       'scripts': ['bin/playitslowly'],
-      'options': {'py2exe':{
+      'options': {'py2exe': {
           'packages': 'encodings',
           'includes': 'cairo, pango, pangocairo, atk, gobject',
           'dist_dir': 'dist/win32',
@@ -74,8 +79,8 @@ kwargs = {
 try:
     import py2exe
     kwargs['windows'] = [{'script': 'bin/playitslowly',
-          'icon_resources': [(1, 'playitslowly.ico')],
-          'dest_base': 'playitslowly'}]
+                          'icon_resources': [(1, 'playitslowly.ico')],
+                          'dest_base': 'playitslowly'}]
 except ImportError:
     pass
 
